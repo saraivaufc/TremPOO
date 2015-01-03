@@ -7,23 +7,38 @@ import java.util.List;
 
 import ufc.poo.engine.drawable.BugDrawable;
 
-public class Trem implements BugDrawable {
+public class Trem implements BugDrawable{
 	private Locomotiva locomotiva;
 	private List<Vagao> vagoes;
-	public Trem(){}
+	
+	public Trem(){
+		setVagoes(new ArrayList<Vagao>());
+	}
+	
 	public Trem(Locomotiva locomotiva) {
 		this.setLocomotiva(locomotiva);
 		setVagoes(new ArrayList<Vagao>());
 	}
-	public boolean adicionarVagao(Vagao vagao){
-		if(this.vagoes.size() == this.locomotiva.getLimiteVagoes()){
+	public boolean adicionarVagao(Vagao vagao, int tipo){
+		if(this.getQuantidadeVagoes() >= this.locomotiva.getLimiteVagoes()){
 			return false;
 		}else{
-			this.vagoes.add(vagao);
+			if(tipo == 1){
+				this.vagoes.add((VagaoPessoa)vagao);
+			}else if(tipo == 2){
+				this.vagoes.add((VagaoAnimal)vagao);
+			}else{
+				return false;
+			}
 			return true;
 		}
 		
 	}
+	
+	public int getQuantidadeVagoes(){
+		return vagoes.size();
+	}
+	
 	public boolean removerVagao(int index){
 		if(this.vagoes.size() == 0){
 			System.out.println("Falha ao remover Vagão");
@@ -48,27 +63,62 @@ public class Trem implements BugDrawable {
 	}
 	
 	public boolean embarcar(Passageiro passageiro){
-		for (Vagao v : this.getVagoes()) {
-			if(v.espacoLivre() > 0){
-				v.embarcar(passageiro);
-				System.out.println("Passageiro embarcado com Sucesso");
-				return true;
+			 int index = 0;
+			 for (Vagao v : this.vagoes) {
+				if(v instanceof VagaoPessoa){
+					if(v.espacoLivre() <= 0)
+						continue;
+					
+					
+					if(passageiro instanceof Fresca){
+						boolean passeEsq = true;
+						boolean passDir = true;
+						for (int i = index; (i <= index + ((Fresca)passageiro).getFrescura()) && (i < this.numeroVagoes()); i++) {
+							if(vagoes.get(i) instanceof VagaoAnimal){
+								passeEsq = false;
+							}
+						}
+						for (int k = index; (k >= index - ((Fresca)passageiro).getFrescura()) && (k >= 0); k--) {
+							if(vagoes.get(k) instanceof VagaoAnimal){
+								passDir = false;
+							}
+						}
+						if(passDir && passeEsq){
+							v.embarcar((Fresca)passageiro);
+							System.out.println("Passageiro(Fresca) embarcado com Sucesso");
+							return true;
+						}
+					}else if(passageiro instanceof Pessoa){
+						v.embarcar((Pessoa)passageiro);
+						System.out.println("Passageiro embarcado com Sucesso");
+						return true;
+					}
+				}else if(v instanceof VagaoAnimal){
+					if(passageiro instanceof Animal){
+						if(v.espacoLivre() < ((Animal)passageiro).getPeso())
+							continue;
+						
+						v.embarcar((Animal)passageiro);
+						System.out.println("Passageiro embarcado com Sucesso");
+						return true;
+					}
+				}
+				index++;
 			}
-		}	
 		return false;
 	}
-	public boolean desembarcar(long cpf){
-		for (Vagao v : this.getVagoes()) {
-			if(v.getPassageiros().remove(new Passageiro(" ", cpf))){
+	public boolean desembarcar(long id){
+		for (Vagao v : this.vagoes) {
+			if(v.getPassageiros().remove(new Pessoa(" ", id))){
 				return true;
 			};
 		}		
 		return false;
 	}
 	public Passageiro buscar(long cpf){
-		for (Vagao v : this.getVagoes()) {
+		for (Vagao v : this.vagoes) {
 			for (Passageiro p : v.getPassageiros()) {
-				if(p.equals(new Passageiro(" ", cpf))){
+				if(p.equals(new Pessoa(" ", cpf))){
 					return p;
 				}
 			}
@@ -81,7 +131,7 @@ public class Trem implements BugDrawable {
 	}
 	public int numeroPassageiro(){
 		int quantPassageiros=0;
-		for (Vagao v : this.getVagoes()) {
+		for (Vagao v : this.vagoes) {
 			quantPassageiros += v.getPassageiros().size();
 		}
 		return quantPassageiros;
@@ -102,36 +152,38 @@ public class Trem implements BugDrawable {
 	public void setLocomotiva(Locomotiva locomotiva) {
 		this.locomotiva = locomotiva;
 	}
-	public List<Vagao> getVagoes() {
-		return vagoes;
-	}
 	public List<Passageiro>  getPassageiros(){
 		List<Passageiro> p = new ArrayList<Passageiro>();
-		for (Vagao v : this.getVagoes()) {
+		for (Vagao v : this.vagoes) {
 			for (Passageiro passageiro : v.getPassageiros()) {
 				p.add(passageiro);
 			}
 		}
 		return p;
 	}
+	
+	public int getQuantVagoes(){
+		return this.vagoes.size();
+	}
+	
 	public void setVagoes(List<Vagao> vagoes) {
 		this.vagoes = vagoes;
 	} 
 	public void update(){
-		if(this.getVagoes().size() == 0){
+		if(getQuantVagoes() == 0){
 			if(locomotiva.getImagem().getX()+ locomotiva.getImagem().getWidth() <= 0){
 				locomotiva.getImagem().setPos(new Point(Macros.DIMENCOES_TELA.x ,locomotiva.getImagem().getY()));
 			}
 		}else{
-			if(locomotiva.getImagem().getX() + (locomotiva.getImagem().getWidth() * (this.getVagoes().size()+1)) <= 0 ){
+			if(locomotiva.getImagem().getX() + (locomotiva.getImagem().getWidth() * (getQuantVagoes() + 1 )) <= 0 ){
 				locomotiva.getImagem().setPos(new Point(Macros.DIMENCOES_TELA.x ,locomotiva.getImagem().getY()));
 			}
 		}
 		
 		float unidade =  locomotiva.getImagem().getX() + locomotiva.getImagem().getWidth();
 		int i=1;
-		Vagao anterior = new Vagao(0);
-		for (Vagao v : this.getVagoes()){
+		Vagao anterior = new VagaoPessoa(0);
+		for (Vagao v : this.vagoes){
 			if(i == 1){
 				v.update((int)unidade, locomotiva.getImagem().getY());
 				
@@ -150,9 +202,8 @@ public class Trem implements BugDrawable {
 	}
 	@Override
 	public void paint(Graphics g) {
-		// TODO Auto-generated method stub
 		getLocomotiva().getImagem().paint(g);
-		for (Vagao v : vagoes){
+		for (Vagao v : this.vagoes) {
 			v.getImagem().paint(g);
 		}
 	}

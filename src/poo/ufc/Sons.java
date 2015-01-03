@@ -33,6 +33,36 @@ public class Sons {
 		System.out.println("Tocando Railclack");
 		this.railclack.loop();
 	}
+	public AudioClip getRailclack() {
+		return railclack;
+	}
+	public void setRailclack(AudioClip railclack) {
+		this.railclack = railclack;
+	}
+	public AudioClip getApitoSaida() {
+		return apitoSaida;
+	}
+	public void setApitoSaida(AudioClip apitoSaida) {
+		this.apitoSaida = apitoSaida;
+	}
+	public AudioClip getApitoChegada() {
+		return apitoChegada;
+	}
+	public void setApitoChegada(AudioClip apitoChegada) {
+		this.apitoChegada = apitoChegada;
+	}
+	public AudioClip getBuzina() {
+		return buzina;
+	}
+	public void setBuzina(AudioClip buzina) {
+		this.buzina = buzina;
+	}
+	public AudioClip getSinoPassagem() {
+		return sinoPassagem;
+	}
+	public void setSinoPassagem(AudioClip sinoPassagem) {
+		this.sinoPassagem = sinoPassagem;
+	}
 	public void pareRailclackLoop(){
 		System.out.println("Parando Railclack");
 		this.railclack.stop();

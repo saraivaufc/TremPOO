@@ -1,19 +1,21 @@
 package poo.ufc;
 
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import java.awt.Font;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.GridLayout;
-import javax.swing.SwingConstants;
 
-public class ControleWindow extends JPanel {
+
+
+public class ControleWindow extends JFrame {
 	
 	/**
 	 * 
@@ -50,23 +52,60 @@ public class ControleWindow extends JPanel {
 		adicionarPassageiro.addActionListener(new ActionListener() {
 			
 			public void actionPerformed(ActionEvent e) {
-				String nome;
-				long cpf;
-				try {
-					nome = JOptionPane.showInputDialog("Digite o Nome do Usuário:");
-					if(nome.isEmpty()){
-						return;
-					}
-					cpf = Long.parseLong(JOptionPane.showInputDialog("Digite o CPF do Usuário:"));
-					
-				} catch (Exception e2) {
+				Passageiro p;
+				int tipoPassageiro;
+				try{
+					tipoPassageiro = Controlador.opcaoPassageiro();
+				}catch(Exception e1){
 					return;
 				}
-				if(nome.isEmpty() || cpf == 0){
-					JOptionPane.showInternalMessageDialog(null, "Erro ao Adicionar Passageiro");
+				
+				if(tipoPassageiro == -1){
+					return;
 				}
-				Passageiro p = new Passageiro(nome, cpf);
-				System.out.println(p.toString());
+				if(tipoPassageiro == 1 || tipoPassageiro == 3){
+					String nome;
+					long cpf;
+					int frescura = 0;
+					try {
+						nome = JOptionPane.showInputDialog("Digite o Nome do Usuário:");
+						cpf = Long.parseLong(JOptionPane.showInputDialog("Digite o CPF do Usuário:"));
+						if(nome.isEmpty() || cpf == 0){
+							JOptionPane.showInternalMessageDialog(null, "Erro ao Adicionar Passageiro");
+							return;
+						}
+						if(tipoPassageiro == 3){
+							frescura = Integer.parseInt(JOptionPane.showInputDialog("Digite o nivel de frescura:"));
+						}
+						
+					} catch (Exception e2) {
+						return;
+					}
+					if(tipoPassageiro == 3){
+						p = (Pessoa) (new Fresca(nome, cpf, frescura)); 
+					}else{
+						p = new Pessoa(nome, cpf);
+					}
+						System.out.println(p.toString());
+				}else{
+					String especie;
+					int peso;
+					try {
+						especie = JOptionPane.showInputDialog("Digite a especie do animal");
+						peso = Integer.parseInt((JOptionPane.showInputDialog("Digite o peso do animal:")));
+						if(especie.isEmpty()){
+							return;
+						}
+						
+					} catch (Exception e2) {
+						return;
+					}
+					if(especie.isEmpty() || peso == 0){
+					}
+						p = new Animal(0, especie, peso);
+						System.out.println(p.toString());
+				}
+				
 				if(trem.embarcar(p) == false){
 					JOptionPane.showMessageDialog(null, "Não temos lugares o suficiente!!!\nAconselho esperar o trem possuir mais um vagão ou\n algum passageiro desembarcar...");
 				};
@@ -141,7 +180,7 @@ public class ControleWindow extends JPanel {
 		JButton removerVagoes = new JButton("Remover");
 		removerVagoes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String quantidadeVagoes = String.valueOf(trem.getVagoes().size());
+				String quantidadeVagoes = String.valueOf(trem.getQuantVagoes());
 				int index;
 				try {
 					index = Integer.parseInt(JOptionPane.showInputDialog("Existe " + quantidadeVagoes + " Vagoes.\nEscolha um para Remover:"));
@@ -173,21 +212,35 @@ public class ControleWindow extends JPanel {
 			}
 		});
 		
-		
 		//adicionar vagões ao trem
 		JButton adicionarVagoes = new JButton("Adicionar");
 		adicionarVagoes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
-				int capacidade;
-				try {
-					capacidade = Integer.parseInt(JOptionPane.showInputDialog("Digite a Capacidade Max do Vagão:"));			
-				} catch (Exception e2) {
-					JOptionPane.showMessageDialog(null, "Por favor, digite uma numero e tente novamente...");
+				int opcao = Controlador.opcaoVagao();
+				if(opcao == -1){
 					return;
 				}
-				if(capacidade > 10)
-					capacidade = 10;
-				trem.adicionarVagao(new Vagao(capacidade));
+				
+				int capacidade;
+				if(opcao == 1){
+					try {
+						capacidade = Integer.parseInt(JOptionPane.showInputDialog("Digite a Capacidade Max de passageiros que o vagao suporta:"));			
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(null, "Por favor, digite uma numero e tente novamente...");
+						return;
+					}
+					if(capacidade > 10)
+						capacidade = 10;
+					trem.adicionarVagao(new VagaoPessoa(capacidade), 1);
+				}else if(opcao == 2){
+					try {
+						capacidade = Integer.parseInt(JOptionPane.showInputDialog("Digite o Peso maximo que o vagao pode suportar:"));			
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(null, "Por favor, digite uma numero e tente novamente...");
+						return;
+					}
+					trem.adicionarVagao(new VagaoAnimal(capacidade), 2);
+				}
 			}
 		});
 		add(adicionarVagoes);
@@ -224,8 +277,9 @@ public class ControleWindow extends JPanel {
 			}
 		});
 		add(parar);
+		
+		//teclado
 
 	}
-	
 
 }

@@ -9,7 +9,9 @@ public class Locomotiva {
 	private float velocidade;
 	private BugImage imagem;
 	
-	public Locomotiva(){}
+	public Locomotiva(){
+		
+	}
 	
 	public Locomotiva(int limiteVagoes, BugImage imagem) {
 		this.setLimiteVagoes(limiteVagoes);
